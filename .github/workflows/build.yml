@@ -1,0 +1,79 @@
+name: Build
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    paths:
+      # Flatpak files
+      - "**.yml"
+      - "**.toml"
+      - "scripts/**"
+      - "shared-modules/**"
+
+      # Workflows
+      - ".github/workflows/build.yml"
+  pull_request:
+    paths:
+      # Flatpak files
+      - "**.yml"
+      - "**.toml"
+      - "scripts/**"
+      - "shared-modules/**"
+
+      # Workflows
+      - ".github/workflows/build.yml"
+  workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build (${{ matrix.arch }})
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            arch: x86_64
+          - os: ubuntu-24.04-arm
+            arch: aarch64
+
+    runs-on: ${{ matrix.os }}
+
+    container:
+      image: ghcr.io/flathub-infra/flatpak-github-actions:kde-6.10
+      options: --privileged
+      volumes:
+        - /opt/hostedtoolcache:/hostedtoolcache
+
+    steps:
+      - name: Free up disk space
+        shell: bash
+        run: |
+          rm -rf /hostedtoolcache/*
+
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          submodules: true
+
+      - name: Set short version
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          UPSTREAM_SHA="$(gh api /repos/PrismLauncher/PrismLauncher/branches/develop --jq '.commit.sha')"
+          echo "VERSION=${UPSTREAM_SHA::7}" >> "$GITHUB_ENV"
+
+      - name: Build Flatpak
+        uses: flatpak/flatpak-github-actions/flatpak-builder@v6
+        with:
+          bundle: PrismLauncher-${{ runner.os }}-${{ env.VERSION }}-Flatpak.flatpak
+          manifest-path: org.prismlauncher.PrismLauncher.yml
+          arch: ${{ matrix.arch }}
