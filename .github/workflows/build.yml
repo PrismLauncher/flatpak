@@ -133,6 +133,12 @@ jobs:
             --prune \
             "$REPOSITORY_DIR"
 
+      - name: Copy static assets to repository
+        if: ${{ inputs.cache-repository }}
+        shell: bash
+        run: |
+          cp index.html prismlauncher.flatpakrepo repo/
+
       - name: Cache local repository
         if: ${{ inputs.cache-repository }}
         uses: actions/cache/save@v5
