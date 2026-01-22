@@ -32,8 +32,8 @@ jobs:
       # WARN(@getchoo): DON'T REMOVE THIS!
       # We share and incrementally update a repository with each subsequent build
       # Having builds run in parallel would overwrite the repository with only one build
-      # We *can* use parallel builds when not dealing with the repository though (like in PRs!)
-      max-parallel: ${{ github.event_name == 'workflow_call' && 1 || 99 }}
+      # TODO: Figure out how to not limit this when we aren't worried about the repository (i.e., PRs)
+      max-parallel: 1
       matrix:
         include:
           - os: ubuntu-24.04
