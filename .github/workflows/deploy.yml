@@ -1,0 +1,68 @@
+name: Deploy to repository
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      # Flatpak files
+      - "**.yml"
+      - "**.toml"
+      - "scripts/**"
+      - "shared-modules/**"
+
+      # Workflows
+      - ".github/workflows/build.yml"
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  build:
+    name: Build Flatpaks
+    uses: ./.github/workflows/build.yml
+
+  upload:
+    name: Upload repository
+
+    needs: build
+
+    runs-on: ubuntu-slim
+
+    steps:
+      - name: Get Date
+        id: get-date
+        shell: bash
+        run: |
+          echo "date=$(/bin/date -u '+%Y%m%d')" >> "$GITHUB_OUTPUT"
+
+      - name: Restore local repository
+        uses: actions/cache/restore@v5
+        with:
+          path: repo/
+          key: repository-${{ steps.get-date.outputs.date }}
+
+      - name: Upload repository as artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: repo/
+
+  deploy:
+    name: Deploy to GitHub pages
+
+    needs: upload
+
+    runs-on: ubuntu-slim
+
+    permissions:
+      id-token: write
+      pages: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

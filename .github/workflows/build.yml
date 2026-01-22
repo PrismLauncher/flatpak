@@ -5,16 +5,6 @@ concurrency:
   cancel-in-progress: true
 
 on:
-  push:
-    paths:
-      # Flatpak files
-      - "**.yml"
-      - "**.toml"
-      - "scripts/**"
-      - "shared-modules/**"
-
-      # Workflows
-      - ".github/workflows/build.yml"
   pull_request:
     paths:
       # Flatpak files
@@ -28,15 +18,22 @@ on:
   workflow_call:
   workflow_dispatch:
 
-permissions:
-  contents: read
+permissions: {}
 
 jobs:
   build:
     name: Build (${{ matrix.arch }})
 
+    permissions:
+      contents: read
+
     strategy:
       fail-fast: false
+      # WARN(@getchoo): DON'T REMOVE THIS!
+      # We share and incrementally update a repository with each subsequent build
+      # Having builds run in parallel would overwrite the repository with only one build
+      # We *can* use parallel builds when not dealing with the repository though (like in PRs!)
+      max-parallel: ${{ github.event_name == 'workflow_call' && 1 || 99 }}
       matrix:
         include:
           - os: ubuntu-24.04
@@ -71,9 +68,38 @@ jobs:
           UPSTREAM_SHA="$(gh api /repos/PrismLauncher/PrismLauncher/branches/develop --jq '.commit.sha')"
           echo "VERSION=${UPSTREAM_SHA::7}" >> "$GITHUB_ENV"
 
+      - name: Get Date
+        if: ${{ github.event_name == 'workflow_call' }}
+        id: get-date
+        shell: bash
+        run: |
+          echo "date=$(/bin/date -u '+%Y%m%d')" >> "$GITHUB_OUTPUT"
+
+      - name: Restore local repository
+        if: ${{ github.event_name == 'workflow_call' }}
+        id: restore-repository
+        uses: actions/cache/restore@v5
+        with:
+          path: repo/
+          key: repository-${{ steps.get-date.outputs.date }}
+
       - name: Build Flatpak
         uses: flatpak/flatpak-github-actions/flatpak-builder@v6
         with:
-          bundle: PrismLauncher-${{ runner.os }}-${{ env.VERSION }}-Flatpak.flatpak
           manifest-path: org.prismlauncher.PrismLauncher.yml
           arch: ${{ matrix.arch }}
+          branch: nightly
+          bundle: PrismLauncher-${{ env.VERSION }}-${{ matrix.arch }}.flatpak
+
+      - name: Update and prune repository
+        if: ${{ github.event_name == 'workflow_call' }}
+        shell: bash
+        run: |
+          flatpak build-update-repo --generate-static-deltas --prune repo/
+
+      - name: Cache local repository
+        if: ${{ github.event_name == 'workflow_call' }}
+        uses: actions/cache/save@v5
+        with:
+          path: repo/
+          key: ${{ steps.restore-repository.outputs.cache-primary-key }}
