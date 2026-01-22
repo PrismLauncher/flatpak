@@ -7,12 +7,17 @@ on:
     paths:
       # Flatpak files
       - "**.yml"
-      - "**.toml"
+      - "**.json"
       - "scripts/**"
       - "shared-modules/**"
 
+      # Site files
+      - "prismlauncher.flatpakrepo"
+      - "index.html"
+
       # Workflows
       - ".github/workflows/build.yml"
+      - ".github/workflows/deploy.yml"
   workflow_dispatch:
 
 permissions: {}
@@ -25,6 +30,7 @@ jobs:
     uses: ./.github/workflows/build.yml
     with:
       cache-repository: true
+    secrets: inherit
 
   upload:
     name: Upload repository
@@ -34,22 +40,16 @@ jobs:
     runs-on: ubuntu-slim
 
     steps:
-      - name: Get Date
-        id: get-date
-        shell: bash
-        run: |
-          echo "date=$(/bin/date -u '+%Y%m%d')" >> "$GITHUB_OUTPUT"
-
       - name: Restore local repository
         uses: actions/cache/restore@v5
         with:
-          path: repo/
-          key: repository-${{ steps.get-date.outputs.date }}
+          path: ${{ needs.build.outputs.repository-directory }}
+          key: ${{ needs.build.outputs.repository-cache-key }}
 
       - name: Upload repository as artifact
         uses: actions/upload-pages-artifact@v4
         with:
-          path: repo/
+          path: ${{ needs.build.outputs.repository-directory }}
 
   deploy:
     name: Deploy to GitHub pages

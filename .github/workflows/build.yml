@@ -9,9 +9,13 @@ on:
     paths:
       # Flatpak files
       - "**.yml"
-      - "**.toml"
+      - "**.json"
       - "scripts/**"
       - "shared-modules/**"
+
+      # Site files
+      - "prismlauncher.flatpakrepo"
+      - "index.html"
 
       # Workflows
       - ".github/workflows/build.yml"
@@ -22,6 +26,17 @@ on:
         type: boolean
         description: Whether to cache the repository created by Flatpak builds
         default: false
+    outputs:
+      repository-cache-key:
+        description: Cache key used to save the contents of the repository
+        value: ${{ jobs.build.outputs.repository-cache-key }}
+      repository-directory:
+        description: Directory name of the cached repository
+        value: ${{ jobs.build.outputs.repository-directory }}
+    secrets:
+      GPG_PRIVATE_KEY:
+        description: GPG key used for signing the ostree repository
+        required: false
   workflow_dispatch:
     inputs:
       cache-repository:
@@ -34,6 +49,10 @@ permissions: {}
 jobs:
   build:
     name: Build (${{ matrix.arch }})
+
+    outputs:
+      repository-cache-key: ${{ steps.restore-repository.outputs.cache-primary-key }}
+      repository-directory: ${{ env.REPOSITORY_DIR }}
 
     permissions:
       contents: read
@@ -59,6 +78,10 @@ jobs:
       volumes:
         - /opt/hostedtoolcache:/hostedtoolcache
 
+    env:
+      GPG_KEY_ID: ${{ secrets.GPG_PRIVATE_KEY != '' && vars.GPG_KEY_ID || '' }}
+      REPOSITORY_DIR: repo
+
     steps:
       - name: Free up disk space
         shell: bash
@@ -79,37 +102,62 @@ jobs:
           echo "VERSION=${UPSTREAM_SHA::7}" >> "$GITHUB_ENV"
 
       - name: Get Date
-        if: ${{ inputs.cache-repository }}
         id: get-date
+        if: ${{ inputs.cache-repository }}
         shell: bash
         run: |
           echo "date=$(/bin/date -u '+%Y%m%d')" >> "$GITHUB_OUTPUT"
 
       - name: Restore local repository
-        if: ${{ inputs.cache-repository }}
         id: restore-repository
+        if: ${{ inputs.cache-repository }}
         uses: actions/cache/restore@v5
         with:
-          path: repo/
+          path: ${{ env.REPOSITORY_DIR }}
           key: repository-${{ steps.get-date.outputs.date }}
 
+      - name: Setup signing
+        shell: bash
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY || '' }}
+        run: |
+          if [[ -z "$GPG_PRIVATE_KEY" ]]; then
+            echo ":warning: Not signing Flatpaks or ostree repositories, as the signing key was not present" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo -n "$GPG_PRIVATE_KEY" | base64 -d | gpg --import
+            gpg --list-keys --keyid-format=long "$GPG_KEY_ID"
+          fi
+
       - name: Build Flatpak
-        uses: flatpak/flatpak-github-actions/flatpak-builder@v6
+        # TODO(@getchoo): Pin this to a tag when https://github.com/flatpak/flatpak-github-actions/pull/237 is included in a release!
+        uses: flatpak/flatpak-github-actions/flatpak-builder@0a631396999e4243489a8a6ecf54fcb9f0575078
         with:
           manifest-path: org.prismlauncher.PrismLauncher.yml
           arch: ${{ matrix.arch }}
           branch: nightly
           bundle: PrismLauncher-${{ env.VERSION }}-${{ matrix.arch }}.flatpak
+          repo-dir: ${{ env.REPOSITORY_DIR }}
+          gpg-sign: ${{ env.GPG_KEY_ID }}
 
       - name: Update and prune repository
         if: ${{ inputs.cache-repository }}
         shell: bash
         run: |
-          flatpak build-update-repo --generate-static-deltas --prune repo/
+          flatpak build-update-repo \
+            "${GPG_KEY_ID:+--gpg-sign="$GPG_KEY_ID"}" \
+            --generate-static-deltas \
+            --prune \
+            "$REPOSITORY_DIR"
+
+      - name: Copy static assets to repository
+        if: ${{ inputs.cache-repository }}
+        shell: bash
+        run: |
+          cp index.html prismlauncher.flatpakrepo repo/
 
       - name: Cache local repository
         if: ${{ inputs.cache-repository }}
         uses: actions/cache/save@v5
         with:
-          path: repo/
+          path: ${{ env.REPOSITORY_DIR }}
           key: ${{ steps.restore-repository.outputs.cache-primary-key }}
