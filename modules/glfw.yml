@@ -1,0 +1,21 @@
+name: glfw
+buildsystem: cmake-ninja
+config-opts:
+  - -DCMAKE_BUILD_TYPE=RelWithDebInfo
+  - -DBUILD_SHARED_LIBS:BOOL=ON
+  - -DGLFW_BUILD_WAYLAND:BOOL=ON
+  - -DGLFW_BUILD_DOCS:BOOL=OFF
+sources:
+  - type: git
+    url: https://github.com/glfw/glfw.git
+    commit: 7b6aead9fb88b3623e3b3725ebb42670cbe4c579 # 3.4
+  - type: patch
+    path: ../patches/0001-Wayland-Partially-implement-glfwSetCursorPos.patch
+  - type: patch
+    path: ../patches/0002-Wayland-Implement-glfwSetWindowIcon.patch
+  - type: patch
+    path: ../patches/0003-proceed-even-though-no-window-icon-support-on-waylan.patch
+cleanup:
+  - /include
+  - /lib/cmake
+  - /lib/pkgconfig

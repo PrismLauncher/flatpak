@@ -18,7 +18,7 @@
     },
     {
       "type": "patch",
-      "path": "patches/0001-Ez-peazy.flite.patch"
+      "path": "../patches/0001-Ez-peazy.flite.patch"
     }
   ]
 }
