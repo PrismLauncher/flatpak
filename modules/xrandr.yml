@@ -10,5 +10,5 @@ sources:
       stable-only: true
       url-template: https://xorg.freedesktop.org/archive/individual/app/xrandr-$version.tar.xz
 cleanup:
-  - /share/man
   - /bin/xkeystone
+  - /share/man

@@ -3,10 +3,16 @@ buildsystem: meson
 config-opts:
   - --bindir=/app/mesa-demos
   - -Degl=disabled
+  - -Dgles1=disabled
+  - -Dgles2=disabled
   - -Dglut=disabled
+  - -Dlibdrm=disabled
   - -Dosmesa=disabled
   - -Dvulkan=disabled
   - -Dwayland=disabled
+
+  # Only feature required for `glxinfo`
+  - -Dx11=enabled
 post-install:
   - mv -v /app/mesa-demos/glxinfo /app/bin
 sources:
@@ -18,9 +24,8 @@ sources:
       project-id: 16781
       stable-only: true
       url-template: https://archive.mesa3d.org/demos/mesa-demos-$version.tar.xz
-cleanup:
-  - /include
-  - /mesa-demos
-  - /share
 modules:
   - ../shared-modules/glu/glu-9.json
+cleanup:
+  - /mesa-demos
+  - /share/mesa-demos
