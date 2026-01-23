@@ -32,10 +32,10 @@ modules:
   - modules/tomlplusplus.yml
 
   # Text to Speech in the game
-  - modules/flite.json
+  - modules/flite.yml
 
   # Needed for proper Wayland support
-  - modules/libdecor.json
+  - modules/libdecor.yml
 
   # Required for GPU info
   - modules/glxinfo.yml
