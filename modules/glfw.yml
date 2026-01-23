@@ -6,9 +6,15 @@ config-opts:
   - -DGLFW_BUILD_WAYLAND:BOOL=ON
   - -DGLFW_BUILD_DOCS:BOOL=OFF
 sources:
-  - type: git
-    url: https://github.com/glfw/glfw.git
-    commit: 7b6aead9fb88b3623e3b3725ebb42670cbe4c579 # 3.4
+  - type: archive
+    url: https://github.com/glfw/glfw/archive/3.4.tar.gz
+    sha256: c038d34200234d071fae9345bc455e4a8f2f544ab60150765d7704e08f3dac01
+    x-checker-data:
+      type: anitya
+      project-id: 1180
+      stable-only: true
+      url-template: https://github.com/glfw/glfw/archive/$version.tar.gz
+
   - type: patch
     path: ../patches/0001-Wayland-Partially-implement-glfwSetCursorPos.patch
   - type: patch
