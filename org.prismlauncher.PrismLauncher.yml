@@ -34,9 +34,6 @@ modules:
   # Text to Speech in the game
   - modules/flite.yml
 
-  # Needed for proper Wayland support
-  - modules/libdecor.yml
-
   # Required for GPU info
   - modules/glxinfo.yml
 
