@@ -1,5 +1,7 @@
 name: tomlplusplus
-buildsystem: cmake-ninja
+buildsystem: meson
+config-opts:
+  - -Dbuild_lib=true
 sources:
   - type: archive
     url: https://github.com/marzer/tomlplusplus/archive/v3.4.0.tar.gz
@@ -9,3 +11,7 @@ sources:
       project-id: 370466
       stable-only: true
       url-template: https://github.com/marzer/tomlplusplus/archive/$version.tar.gz
+cleanup:
+  - /include
+  - /lib/cmake
+  - /lib/pkgconfig

@@ -2,9 +2,11 @@ name: glfw
 buildsystem: cmake-ninja
 config-opts:
   - -DCMAKE_BUILD_TYPE=RelWithDebInfo
-  - -DBUILD_SHARED_LIBS:BOOL=ON
-  - -DGLFW_BUILD_WAYLAND:BOOL=ON
-  - -DGLFW_BUILD_DOCS:BOOL=OFF
+  - -DBUILD_SHARED_LIBS=ON
+  - -DGLFW_BUILD_DOCS=OFF
+  - -DGLFW_BUILD_EXAMPLES=OFF
+  - -DGLFW_BUILD_TESTS=OFF
+  - -DGLFW_BUILD_WAYLAND=ON
 sources:
   - type: archive
     url: https://github.com/glfw/glfw/archive/3.4.tar.gz

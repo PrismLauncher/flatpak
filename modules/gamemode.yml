@@ -3,6 +3,7 @@ buildsystem: meson
 config-opts:
   - -Dwith-sd-bus-provider=no-daemon
   - -Dwith-examples=false
+  - -Dwith-util=false
 post-install:
   # gamemoderun is installed for users who want to use wrapper commands
   # post-install is running inside the build dir, we need it from the source though
@@ -19,6 +20,9 @@ sources:
       url-query: .tarball_url
       timestamp-query: .published_at
 cleanup:
+  - /bin/gamemodelist
+  - /bin/gamemoderun
   - /include
   - /lib/pkgconfig
-  - /lib/libgamemodeauto.a
+  - /share/man
+  - /share/metainfo

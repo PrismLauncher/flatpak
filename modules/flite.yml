@@ -13,3 +13,6 @@ sources:
       tag-pattern: ^v([\d.]+)$
   - type: patch
     path: ../patches/0001-Ez-peazy.flite.patch
+cleanup:
+  - /bin
+  - /include
