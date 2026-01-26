@@ -8,4 +8,4 @@ sources:
       type: anitya
       project-id: 370466
       stable-only: true
-      url-template: https://github.com/marzer/tomlplusplus/archive/$version.tar.gz
+      url-template: https://github.com/marzer/tomlplusplus/archive/v$version.tar.gz
