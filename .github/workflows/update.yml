@@ -30,7 +30,7 @@ jobs:
       - name: Run update
         uses: docker://ghcr.io/flathub/flatpak-external-data-checker:latest
         with:
-          args: --update --edit-only
+          args: --update --edit-only org.prismlauncher.PrismLauncher.yml
 
       - name: Create Pull request
         id: pull-request
