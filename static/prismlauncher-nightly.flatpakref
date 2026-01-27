@@ -1,0 +1,8 @@
+[Flatpak Ref]
+Name=org.prismlauncher.PrismLauncher
+Branch=nightly
+Title=org.prismlauncher.PrismLauncher from the official nightly repository
+Url=https://flatpak.prismlauncher.org/
+RuntimeRepo=https://dl.flathub.org/repo/flathub.flatpakrepo
+IsRuntime=false
+GPGKey=mDMEaXHI2RYJKwYBBAHaRw8BAQdAyWv5ta5C8ioivjANkqmevixXmecGaB/OYITSfTcHiXO0NlByaXNtIExhdW5jaGVyIEZsYXRwYWsgPG1haW50YWluZXJzQHByaXNtbGF1bmNoZXIub3JnPoiUBBMWCgA8FiEEvs5NrMLzpRaHCRlfRS9wGEKLZLcFAmlxyNkCGwMFCQHhM4AECwkIBwQVCgkIBRYCAwEAAh4BAheAAAoJEEUvcBhCi2S3KcwA/iMhnG6jpoIOkfhI0xhHAOe+sua/5LD14951Ziw9dbc5AP0dzwa65dkzBsQyysDiPrfQAvBOdM+uU/TgYNaksQoyAQ==

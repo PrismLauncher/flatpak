@@ -147,7 +147,7 @@ jobs:
         if: ${{ inputs.cache-repository }}
         shell: bash
         run: |
-          cp index.html prismlauncher.flatpakrepo repo/
+          cp -r static/. "$REPOSITORY_DIR"/
 
       - name: Cache local repository
         if: ${{ inputs.cache-repository }}
