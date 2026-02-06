@@ -15,8 +15,7 @@ on:
       - "shared-modules/**"
 
       # Site files
-      - "prismlauncher.flatpakrepo"
-      - "index.html"
+      - "static/**"
 
       # Workflows
       - ".github/workflows/build.yml"
