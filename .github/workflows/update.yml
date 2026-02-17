@@ -12,9 +12,6 @@ jobs:
   update:
     name: Run update
 
-    permissions:
-      contents: write
-
     runs-on: ubuntu-24.04
 
     steps:
