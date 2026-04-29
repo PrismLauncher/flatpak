@@ -50,7 +50,7 @@ jobs:
           fail-on-cache-miss: true
 
       - name: Upload repository as artifact
-        uses: actions/upload-pages-artifact@v4
+        uses: actions/upload-pages-artifact@v5
         with:
           path: ${{ needs.build.outputs.repository-directory }}
 
