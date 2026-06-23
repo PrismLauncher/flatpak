@@ -43,7 +43,7 @@ jobs:
 
     steps:
       - name: Restore local repository
-        uses: actions/cache/restore@v5
+        uses: actions/cache/restore@v6
         with:
           path: ${{ needs.build.outputs.repository-directory }}
           key: ${{ needs.build.outputs.repository-cache-key }}
