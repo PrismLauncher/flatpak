@@ -12,7 +12,7 @@ jobs:
   update:
     name: Run update
 
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
 
     steps:
       - name: Generate GitHub App token
