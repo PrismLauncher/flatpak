@@ -76,6 +76,6 @@ modules:
       # Script used to wrap instances and ensure they use dGPUs in hyprid configurations
       - type: file
         path: scripts/prime-run
-      # Sets up misc integrations with gamemode, mangohud, Discord RPC, etc.
+      # Sets up Discord RPC.
       - type: file
         path: scripts/prismlauncher
