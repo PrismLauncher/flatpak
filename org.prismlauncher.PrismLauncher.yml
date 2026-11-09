@@ -11,7 +11,7 @@ cleanup:
   - /share/tomlplusplus
   - /share/qlogging-categories6
   - /share/man
-  - /share/Prismlauncher
+  - /share/PrismLauncher
   - /include
 
 finish-args:
