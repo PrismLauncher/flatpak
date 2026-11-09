@@ -38,7 +38,6 @@ finish-args:
   - --env=PATH=/usr/lib/extensions/vulkan/gamescope/bin:/usr/lib/extensions/vulkan/MangoHud/bin:/app/bin:/app/utils/bin:/usr/bin
   - --env=VK_LAYER_PATH=/usr/lib/extensions/vulkan/share/vulkan/implicit_layer.d/
 
-
 modules:
   - modules/cmark.yml
   # Text to Speech in the game
