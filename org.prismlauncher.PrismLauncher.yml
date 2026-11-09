@@ -1,17 +1,27 @@
 id: org.prismlauncher.PrismLauncher
 runtime: org.kde.Platform
-runtime-version: '6.10'
+runtime-version: '6.11'
 sdk: org.kde.Sdk
+command: prismlauncher-wrapper
 sdk-extensions:
   - org.freedesktop.Sdk.Extension.openjdk17
 
-command: prismlauncher
+cleanup:
+  - /lib
+  - /share/tomlplusplus
+  - /share/qlogging-categories6
+  - /share/man
+  - /share/PrismLauncher
+  - /include
+
 finish-args:
   - --share=ipc
-  - --socket=x11
-  - --socket=wayland
-  - --device=all
   - --share=network
+  - --socket=wayland
+  - --socket=x11
+  - --device=dri
+  - --device=input
+  - --device-if=all:!has-input-device
   - --socket=pulseaudio
     # for Discord RPC mods
   - --filesystem=xdg-run/app/com.discordapp.Discord:create
@@ -25,34 +35,32 @@ finish-args:
     # Userspace visibility for transparent hugepages configuration
     # Required for -XX:+UseTransparentHugePages
   - --filesystem=/sys/kernel/mm/transparent_hugepage:ro
+  - --env=PATH=/usr/lib/extensions/vulkan/gamescope/bin:/usr/lib/extensions/vulkan/MangoHud/bin:/app/bin:/app/utils/bin:/usr/bin
+  - --env=VK_LAYER_PATH=/usr/lib/extensions/vulkan/share/vulkan/implicit_layer.d/
 
 modules:
   - modules/cmark.yml
-  - modules/gamemode.yml
-  - modules/tomlplusplus.yml
-
   # Text to Speech in the game
   - modules/flite.yml
-
-  # Required for older Minecraft versions
-  - modules/xrandr.yml
-
   # Our patches improve native Wayland support
   - modules/glfw.yml
+  - modules/tomlplusplus.yml
 
   - name: prismlauncher
     buildsystem: cmake-ninja
+    build-options:
+      env:
+        JAVA_HOME: /usr/lib/sdk/openjdk17/jvm/openjdk-17
+        JAVA_COMPILER: /usr/lib/sdk/openjdk17/jvm/openjdk-17/bin/javac
     builddir: true
     config-opts:
       - -DLauncher_BUILD_PLATFORM=flatpak
       # This allows us to manage and update Java independently of this Flatpak
       - -DLauncher_ENABLE_JAVA_DOWNLOADER=ON
       - -DCMAKE_BUILD_TYPE=RelWithDebInfo
-    build-options:
-      env:
-        JAVA_HOME: /usr/lib/sdk/openjdk17/jvm/openjdk-17
-        JAVA_COMPILER: /usr/lib/sdk/openjdk17/jvm/openjdk-17/bin/javac
     run-tests: true
+    post-install:
+      - desktop-file-edit --set-key Exec --set-value prismlauncher-wrapper /app/share/applications/org.prismlauncher.PrismLauncher.desktop
     sources:
       - type: git
         url: https://github.com/PrismLauncher/PrismLauncher
@@ -61,13 +69,8 @@ modules:
   - name: enhance
     buildsystem: simple
     build-commands:
-      - install -Dm755 prime-run /app/bin/prime-run
-      - mv /app/bin/prismlauncher /app/bin/prismrun
-      - install -Dm755 prismlauncher /app/bin/prismlauncher
+      - install -Dm755 prismlauncher /app/bin/prismlauncher-wrapper
     sources:
-      # Script used to wrap instances and ensure they use dGPUs in hyprid configurations
-      - type: file
-        path: scripts/prime-run
-      # Sets up misc integrations with gamemode, mangohud, Discord RPC, etc.
+      # Sets up Discord RPC.
       - type: file
         path: scripts/prismlauncher
